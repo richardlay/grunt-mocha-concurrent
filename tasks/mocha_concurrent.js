@@ -5,12 +5,12 @@
  * Copyright (c) 2017 Richard Lay
  * Licensed under the MIT license.
  */
-module.exports = grunt => {
+module.exports = function(grunt) {
 
     const Os = require("os");
     const _ = require("lodash");
 
-    grunt.registerMultiTask('mocha_concurrent', 'Run mocha tests in parallel using concurrent grunt tasks.', () => {
+    grunt.registerMultiTask('mocha_concurrent', 'Run mocha tests in parallel using concurrent grunt tasks.', function() {
         let options = this.options({
             envDefault: null,
             envTaskPrefix: "mochaConcurrent-",
