@@ -1,6 +1,6 @@
 {
   "name": "grunt-mocha-concurrent",
-  "description": "Run mocha tests via concurrent grunt tasks.",
+  "description": "Run mocha tests in parallel using concurrent grunt tasks.",
   "version": "0.1.0",
   "homepage": "https://github.com/richardlay/grunt-mocha-concurrent",
   "author": {
@@ -23,6 +23,7 @@
   "engines": {
     "node": ">= 0.8.0"
   },
+  "main": "index.js",
   "scripts": {
     "test": "grunt test"
   },

@@ -5,23 +5,17 @@
  * Copyright (c) 2017 Richard Lay
  * Licensed under the MIT license.
  */
-
-'use strict';
-
-module.exports = function (grunt) {
-
-    // Please see the Grunt documentation for more information regarding task
-    // creation: http://gruntjs.com/creating-tasks
+module.exports = grunt => {
 
     const Os = require("os");
     const _ = require("lodash");
 
-    grunt.registerMultiTask('mocha_concurrent', 'Run mocha tests via concurrent grunt tasks.', function () {
+    grunt.registerMultiTask('mocha_concurrent', 'Run mocha tests in parallel using concurrent grunt tasks.', () => {
         let options = this.options({
-            envDefault: {},
-            envTaskPrefix: "mocha-concurrent-env-",
-            mochaTaskPrefix: "mocha-concurrent-test-",
-            concurrentLimit: Os.cpus().length * 2 || 1
+            envDefault: null,
+            envTaskPrefix: "mochaConcurrent-",
+            mochaTaskPrefix: "mochaConcurrent-",
+            concurrentLimit: Os.cpus().length || 1
         });
 
         let specs = this.data.specs || [];
@@ -33,15 +27,26 @@ module.exports = function (grunt) {
             }
         };
 
+        const gruntConfig = {};
+
         _.each(specs, (spec, i) => {
-            let env = Object.assign({}, options.envDefault);
-            grunt.config.set(`env.${options.envTaskPrefix}${i+1}`, Object.assign(env, spec.envSpec));
-            grunt.config.set(`mochaTest.${options.mochaTaskPrefix}${i+1}`, spec.mochaSpec);
-            concurrentSpec.tasks.push([`env:${options.envTaskPrefix}${i+1}`, `mochaTest:${options.mochaTaskPrefix}${i+1}`]);
+            let name = spec.name || "" + (i+1);
+            name = name.replace(/[^a-zA-Z0-9\/\*]/g,'_');   // Remove chars that might not play nice as a cmd line flag
+            const task = [];
+            if (options.envDefault || spec.envSpec) {
+                let env = Object.assign({}, options.envDefault);
+                const envTarget = `${options.envTaskPrefix}${name}`;
+                _.set(gruntConfig, `env.${envTarget}`, Object.assign(env, spec.envSpec));
+                task.push(`env:${envTarget}`);
+            }
+            const mochaTarget = `${options.mochaTaskPrefix}${name}`;
+            _.set(gruntConfig, `mochaTest.${mochaTarget}`, spec.mochaSpec);
+            task.push(`mochaTest:${mochaTarget}`);
+            concurrentSpec.tasks.push(task);
         });
 
-        grunt.config.set("concurrent.mocha-concurrent-tests", concurrentSpec);
+        grunt.config("concurrent.mocha-concurrent-tests", concurrentSpec);
+        grunt.option("grunt-mocha-concurrent-config", JSON.stringify(gruntConfig));  // Workaround to pass config to new task
         grunt.task.run(["concurrent:mocha-concurrent-tests"]);
     });
-
 };
