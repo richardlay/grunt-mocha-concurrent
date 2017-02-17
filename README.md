@@ -78,7 +78,7 @@ When you run `grunt spec:concurrent` it will run your unit tests and your functi
 
 Say your functional tests read and/or write to the database. You can't run parallel tests in the same process as your tests will step all over each other. You can't run parallel tests in different processes pointing to the same database either! So we get around this by using a different database instance in each task.
 
-If you use an environment variable to control the test database to connect to, then you can use this example. This assumes that your test framework will dynamically create your database/schema for you. I'm using mongodb so this just happens automagically.
+If you use an environment variable to set which database to connect to, then you can use this example. This assumes that your test framework will dynamically create your database/schema for you. I'm using mongodb so this just happens automagically.
 
 ```js
 grunt.initConfig({
@@ -151,6 +151,6 @@ grunt.initConfig({
 * You can get fancy and generate your mocha_concurrent target specs depending on what you need. E.g. I looped over each folder under `tests/functional/controllers` and created a separate spec for each, each with a unique database connection string.
 * If your application is a HTTP API and you call it in your tests, you can also just increment the port number for each spec using the env variable.
 * There is overhead involved in spinning up separate tasks with their own database etc. The more cores you have the more time this will save. Otherwise it may actually be slower than a single task!
-* Clean up old databases after the tests to save space. I defined a global mocha post test using `.after()` and included it in the mochaSpec src for each spec.
+* Clean up old databases after the tests to save space. I defined a global mocha post test using `.after()` and included it in the mochaSpec src for each spec. Mongoose gives you a way to delete the database.
 
 
