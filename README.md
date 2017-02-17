@@ -76,7 +76,7 @@ When you run `grunt spec:concurrent` it will run your unit tests and your functi
 
 ### Advanced example
 
-Say your functional tests read and/or write to the database. You can't run parallel tests in the same process as your tests will step all over each other. You can't run parallel tests in different processes pointing to the same database either! So we get around this by using a different database instance in each task.
+Say your functional tests read and/or write to the database. You can't run parallel tests in the same process as your tests will step all over each other. You can't run parallel tests in different processes pointing to the same database either! So we get around this by using a different database instance in each task. :v:
 
 If you use an environment variable to set which database to connect to, then you can use this example. This assumes that your test framework will dynamically create your database/schema for you. I'm using mongodb so this just happens automagically.
 
