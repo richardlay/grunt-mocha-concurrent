@@ -152,5 +152,5 @@ grunt.initConfig({
 * If your application is a HTTP API and you call it in your tests, you can also just increment the port number for each spec using the env variable.
 * There is overhead involved in spinning up separate tasks with their own database etc. The more cores you have the more time this will save. Otherwise it may actually be slower than a single task!
 * Clean up old databases after the tests to save space. I defined a global mocha post test using `.after()` and included it in the mochaSpec src for each spec. Mongoose gives you a way to delete the database.
-
+* If you don't want grunt to stop when it encounters a failed test, consider using `grunt-continue`.
 
