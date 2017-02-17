@@ -2,88 +2,151 @@
 
 > Run mocha tests via concurrent grunt tasks.
 
-## Getting Started
-This plugin requires Grunt `~0.4.5`
-
-If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
+## Installation
 
 ```shell
 npm install grunt-mocha-concurrent --save-dev
 ```
 
-Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
+## Overview
+
+Even though there are lots of posts online that don't recommend running tests in parallel, I've almost halved the time it takes for my tests to run. Sure, it can be harder to debug issues, but since this uses `grunt-concurrent` to spawn separate processes there won't be any "cross wire" bugs. Besides, if a test fails you can just revert to running your regular serial grunt test task along with a mocha `.only`. But when things are green then why not go faster? :thumbsup:
+
+## Getting started
+
+This library requires `grunt-mocha-test` and `grunt-concurrent`. `grunt-env` is optional.
+
+Check that your `Gruntfile.js` looks something similar to this. It's important that `Concurrent.init(grunt);` appears *after* you call `initConfig()`.
 
 ```js
+const Concurrent = require("grunt-mocha-concurrent");
+...
+grunt.loadNpmTasks('grunt-mocha-test');
+grunt.loadNpmTasks('grunt-concurrent');
 grunt.loadNpmTasks('grunt-mocha-concurrent');
+...
+grunt.initConfig({
+  ...
+});
+Concurrent.init(grunt);
+
 ```
 
-## The "mocha_concurrent" task
+## Simple example
 
-### Overview
-In your project's Gruntfile, add a section named `mocha_concurrent` to the data object passed into `grunt.initConfig()`.
+If your tests don't have any central external dependencies like a database, then this is the example for you.
 
 ```js
 grunt.initConfig({
+  ...
   mocha_concurrent: {
-    options: {
-      // Task-specific options go here.
-    },
     your_target: {
-      // Target-specific file lists and/or options go here.
+      specs: [
+        {
+          mochaSpec: {
+            options: { 
+              reporter: 'dot', 
+              timeout: '2000'
+            },
+            src: ['tests/unit/**/test*.js']
+          }
+        },
+        {
+          mochaSpec: {
+            options: { 
+              reporter: 'dot', 
+              timeout: '2000'
+            },
+            src: ['tests/functional/**/test*.js']
+          }
+        }        
+      ]
     },
-  },
+  }
+  ...
 });
+...
+grunt.registerTask('spec:concurrent', ['mocha_concurrent:your_target']);
 ```
 
-### Options
+When you run `grunt spec:concurrent` it will run your unit tests and your functional tests in parallel.
+`mochaSpec` is just forwarded directly to `grunt-mocha-test` so look up their documentation for the specification.
 
-#### options.separator
-Type: `String`
-Default value: `',  '`
+## Advanced example
 
-A string value that is used to do something with whatever.
+But say your functional tests read/write to the database. You can't run parallel tests in the same process as your tests will step all over each other. So we can get around this by using different database instances.
 
-#### options.punctuation
-Type: `String`
-Default value: `'.'`
-
-A string value that is used to do something else with whatever else.
-
-### Usage Examples
-
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+If you use an environment variable to control the test database to connect to, then you can use this example. This assumes that your test framework will create your database/schema for you. I'm using mongodb so this just happens automagically.
 
 ```js
 grunt.initConfig({
+  grunt.loadNpmTasks('grunt-env');
+  ...
   mocha_concurrent: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
+    your_target: {
+      specs: [
+        {
+          mochaSpec: {
+            options: { 
+              reporter: 'dot', 
+              timeout: '2000'
+            },
+            src: ['tests/unit/**/test*.js']
+          }
+        },
+        {
+          mochaSpec: {
+            options: { 
+              reporter: 'dot', 
+              timeout: '2000'
+            },
+            src: ['tests/functional/controllers/**/test*.js']
+          },
+          envSpec: {
+            MONGODB_URI: 'mongodb://localhost:27017/my-test-db-1'
+          }          
+        },
+        {
+          mochaSpec: {
+            options: { 
+              reporter: 'dot', 
+              timeout: '2000'
+            },
+            src: ['tests/functional/models/**/test*.js']
+          },
+          envSpec: {
+            MONGODB_URI: 'mongodb://localhost:27017/my-test-db-2'
+          }
+        }
+      ]
     },
-  },
+  }
+  ...
 });
+...
+grunt.registerTask('spec:concurrent', ['mocha_concurrent:your_target']);
 ```
 
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+When you run `grunt spec:concurrent` it will run your unit tests and two of your functional test flavours in parallel.
+
+## Default Options
 
 ```js
 grunt.initConfig({
   mocha_concurrent: {
     options: {
-      separator: ': ',
-      punctuation: ' !!!',
+      concurrentLimit: 1,   // Number of concurrent tasks to run in parallel. Defaults to number of cpu cores.
+      envDefault: {},       // Environment variables to pass to all tasks. Defaults to null.
+      envTaskPrefix: "",    // Prefix to use for grunt-env tasks. Defaults to mochaConcurrent-.
+      mochaTaskPrefix: "",  // Prefix to use for grunt-env tasks. Defaults to mochaConcurrent-.
     },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
+    ...
   },
 });
 ```
 
-## Contributing
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
+## Tips
+In thi
 
 ## Release History
 _(Nothing yet)_
