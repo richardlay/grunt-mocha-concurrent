@@ -14,7 +14,7 @@ Even though there are lots of posts online that don't recommend running tests in
 
 ## Getting started
 
-This library requires `grunt-mocha-test` and `grunt-concurrent`. `grunt-env` is optional.
+This plugin requires `grunt-mocha-test` and `grunt-concurrent`. `grunt-env` is optional.
 
 Check that your `Gruntfile.js` looks something similar to this. It's important that `Concurrent.init(grunt);` appears *after* you call `initConfig()`.
 
