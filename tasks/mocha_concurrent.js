@@ -13,6 +13,7 @@ module.exports = function(grunt) {
     grunt.registerMultiTask('mocha_concurrent', 'Run mocha tests in parallel using concurrent grunt tasks.', function() {
         let options = this.options({
             envDefault: null,
+            mochaRunner: "mochaTest",
             envTaskPrefix: "mochaConcurrent-",
             mochaTaskPrefix: "mochaConcurrent-",
             concurrentLimit: Os.cpus().length || 1
@@ -40,8 +41,8 @@ module.exports = function(grunt) {
                 task.push(`env:${envTarget}`);
             }
             const mochaTarget = `${options.mochaTaskPrefix}${name}`;
-            _.set(gruntConfig, `mochaTest.${mochaTarget}`, spec.mochaSpec);
-            task.push(`mochaTest:${mochaTarget}`);
+            _.set(gruntConfig, `${options.mochaRunner}.${mochaTarget}`, spec.mochaSpec);
+            task.push(`${options.mochaRunner}:${mochaTarget}`);
             concurrentSpec.tasks.push(task);
         });
 
